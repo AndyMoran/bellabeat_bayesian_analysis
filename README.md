@@ -2,40 +2,66 @@
 
 ## Overview
 
-This project builds a hierarchical Bayesian model to understand how Bellabeat user personas differ in their hourly activity patterns. The analysis confirms that personas vary not only in how much they move, but when they move — revealing distinct circadian rhythms that can support personalised engagement strategies.
+This project builds a hierarchical Bayesian model to understand how Bellabeat user personas differ in their hourly activity patterns. The model shows that personas vary not only in how much they move, but when they move — revealing clear circadian rhythms that support personalised engagement.
 
-The model resolves several methodological issues in the original exploratory analysis and provides a statistically principled foundation for persona‑specific product features such as timed notifications, habit‑building nudges, and personalised activity insights.
+The analysis replaces ad‑hoc exploratory methods with a principled statistical model. The result is a clean, interpretable foundation for persona‑specific features such as timed notifications, habit‑building nudges, and personalised activity insights.
+
+## Why Bayesian
+
+Bayesian modelling is the right tool for this problem because:
+
+- Hourly step counts are noisy and skewed. A Gamma likelihood handles this naturally.
+
+- Users differ in baseline activity. A hierarchical structure captures this without overfitting.
+
+- We care about uncertainty. Posterior distributions show how confident we are in each persona’s rhythm.
+
+- Daily rhythms are smooth, not jagged. A Fourier basis gives interpretable 24‑hour curves without 24 separate parameters.
+
+- We want probability‑based comparisons. Probability‑of‑superiority answers questions like “How likely is Persona A to be more active than Persona B at 3pm?”
+
+In short: Bayesian methods give honest uncertainty, interpretable structure, and comparisons that make sense for real product decisions.
 
 ## Key Findings
 
-Personas show distinct and credible daily activity rhythms.
+1. Personas follow distinct 24‑hour activity rhythms
+The model identifies four clear activity personas. These groups differ in both intensity and timing, not just total steps.
 
-- A Gamma likelihood ensures all predictions remain positive and matches the right‑skewed nature of step‑count data.
+- Cardio Movers peak around 13:00–14:00, reaching ~1200 steps/hr.
 
-- A Fourier basis replaces the unstable 24‑parameter lookup table, producing smooth, interpretable circadian curves.
+- Mid‑activity users peak slightly later, with moderate mid‑day advantages over lower‑activity groups.
 
-- A hierarchical structure corrects pseudoreplication by modelling user‑level variation.
+- Baseline users show moderate, smoother rhythms.
 
-- Posterior predictive checks confirm the model reproduces the observed distribution.
+- LowAct users remain around 300–400 steps/hr with flatter curves and limited peak structure.
 
-- Probability‑of‑superiority analysis quantifies how likely one persona is to exceed another at each hour.
+2. Hourly differences reveal patterns hidden by daily totals
+Daily aggregates hide meaningful variation. Hour‑by‑hour comparisons show:
 
-- Personas differ in peak activity time, ranging from ~13:30 to ~16:00 depending on group.
+- Cardio Movers exceed LowAct users for most of the day (P > 0.95).
 
-These results validate the exploratory analysis and provide a robust statistical basis for personalised engagement.
+- Mid‑activity users exceed LowAct users during mid‑day hours (P ≈ 0.70–0.80).
+
+- Personas differ more in when they move than in how much they move overall.
+
+3. Most individual variation comes from baseline intensity
+The hierarchical model shows that users differ more in overall activity level than in the shape of their daily cycle.
+The random intercept captures most between‑user variability.
 
 ## Methodology
 
 1. Data Preparation
+
 - Merged daily and hourly step‑count datasets
 
 - Attached persona labels
 
 - Removed extreme outliers
 
-- Constructed modelling arrays for personas, users, and hours
+- Built modelling arrays for personas, users, and hours
 
 2. Bayesian Model
+
 - Likelihood: Gamma with log‑link
 
 - Circadian structure: First‑order Fourier series
@@ -44,9 +70,24 @@ These results validate the exploratory analysis and provide a robust statistical
 
 - Inference: NUTS sampling via PyMC
 
-- Diagnostics: r̂ ≈ 1.00, high ESS, clean PPC
+3. Convergence Diagnostics
 
-3. Behavioural Feature Extraction
+The model converged cleanly:
+
+- r̂ values at or near 1.00
+
+- High effective sample sizes (ESS)
+
+- Well‑mixed trace plots
+
+- No divergences after tuning
+
+- Energy plots showed no pathologies
+
+These checks confirm that the posterior estimates are stable and trustworthy.
+
+4. Behavioural Feature Extraction
+
 - Amplitude (strength of daily rhythm)
 
 - Peak hour (time of maximum activity)
@@ -57,13 +98,17 @@ These results validate the exploratory analysis and provide a robust statistical
 
 ## Results
 
-Reconstructed Activity Curves
-Smooth 24‑hour curves show clear differences in both amplitude and timing across personas. HDI bands widen appropriately for personas with fewer users, reflecting honest uncertainty.
+### Reconstructed Activity Curves
 
-Probability‑of‑Superiority Heatmaps
+Smooth 24‑hour curves show clear differences in amplitude and timing across personas.
+HDI bands widen for personas with fewer users, reflecting honest uncertainty.
+
+### Probability‑of‑Superiority Heatmaps
+
 Hour‑by‑hour comparisons reveal when one persona is more active than another and how strongly those differences persist across the day.
 
-Daily‑Mean Summary Matrix
+### Daily‑Mean Summary
+
 Averaged across all hours, personas form a stable hierarchy:
 
 - Cardio — highest activity
@@ -74,13 +119,9 @@ Averaged across all hours, personas form a stable hierarchy:
 
 - LowAct — lowest
 
-## Persona Comparison Table
+## Business Implications
 
-Summarises amplitude, peak hour, mean predicted activity, and pairwise probabilities.
-
-Business Implications
-
-The distinct hourly patterns suggest clear opportunities for personalised engagement:
+Distinct hourly patterns create clear opportunities for personalised engagement:
 
 - Morning‑active personas → early‑day nudges, hydration reminders
 
@@ -90,19 +131,19 @@ The distinct hourly patterns suggest clear opportunities for personalised engage
 
 - Low‑activity personas → simplified goals, gentle onboarding
 
-Aligning notifications with each persona’s natural rhythm can increase relevance and improve daily engagement.
+- Aligning notifications with each persona’s natural rhythm can increase relevance and improve daily engagement.
 
 ## Lessons Learned
 
-- Model structure matters more than complexity.
+- Model structure matters more than complexity
 
-- Likelihood choice must match the data.
+- Likelihood choice must match the data
 
-- Hierarchical models prevent false confidence.
+- Hierarchical models prevent false confidence
 
-- Posterior predictive checks are essential.
+- Posterior predictive checks are essential
 
-- Interpretability drives product value.
+Interpretability drives product value
 
 ## Repository Structure
 
@@ -135,9 +176,3 @@ Code
 - Run top‑to‑bottom
 
 The notebook is fully reproducible and includes all modelling steps, diagnostics, and visualisations.
-
-## Author
-
-Andrew Moran
-
-I focus on statistical modelling, behavioural insights, and clear, accessible technical communication.
